@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A Little Universe of Love for Arooj</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        plum: '#170B16',
+                        burgundy: '#321323',
+                        winerose: '#54243B',
+                        darkmauve: '#241820',
+                        rosegold: '#DDA9BF',
+                        softpink: '#F5C9D9',
+                        moonlight: '#E8E5FF',
+                        softtext: '#F5DCE9',
+                        nightblue: '#0A1130'
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'Cormorant Garamond', 'Georgia', 'serif'],
+                        sans: ['Montserrat', 'Inter', 'sans-serif'],
+                        cinzel: ['Cinzel', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome & Lucide Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Three.js (r128) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* Base Styling & Custom Animations */
+        body {
+            background-color: #170B16;
+            color: #F5DCE9;
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-card {
+            background: rgba(50, 19, 35, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(221, 169, 191, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+        
+        .glass-card-light {
+            background: rgba(84, 36, 59, 0.35);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(245, 201, 217, 0.3);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 15px rgba(245, 201, 217, 0.6), 0 0 30px rgba(221, 169, 191, 0.4);
+        }
+
+        .box-glow {
+            box-shadow: 0 0 25px rgba(221, 169, 191, 0.35), inset 0 0 15px rgba(245, 201, 217, 0.2);
+        }
+
+        /* 3D Envelope Physics Styling */
+        .envelope-wrapper {
+            perspective: 1200px;
+        }
+
+        .envelope {
+            position: relative;
+            width: 320px;
+            height: 220px;
+            background: #321323;
+            border-radius: 8px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(221, 169, 191, 0.2);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        @media (min-width: 640px) {
+            .envelope {
+                width: 460px;
+                height: 300px;
+            }
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: #54243B;
+            clip-path: polygon(0 0, 50% 100%, 100% 0);
+            transform-origin: top center;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 4;
+            border-top: 2px solid rgba(221, 169, 191, 0.4);
+        }
+
+        .envelope-pocket {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #321323;
+            clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);
+            z-index: 3;
+            border-bottom: 2px solid rgba(221, 169, 191, 0.3);
+        }
+
+        .wax-seal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 54px;
+            height: 54px;
+            background: radial-gradient(circle, #8A2B53 0%, #321323 100%);
+            border: 2px solid #DDA9BF;
+            border-radius: 50%;
+            z-index: 5;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+
+        .wax-seal:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .letter-paper {
+            position: absolute;
+            bottom: 10px;
+            left: 5%;
+            width: 90%;
+            height: 90%;
+            background: #FFFDF9;
+            color: #241820;
+            border-radius: 4px;
+            padding: 24px;
+            z-index: 2;
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            font-family: 'Cormorant Garamond', serif;
+            overflow-y: auto;
+            transform-origin: bottom center;
+        }
+
+        .letter-paper.unfolded {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1) !important;
+            width: 92vw;
+            max-width: 680px;
+            height: 85vh;
+            max-height: 720px;
+            z-index: 100;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.9), 0 0 40px rgba(221, 169, 191, 0.5);
+            border: 12px solid #FFFDF9;
+            outline: 1px solid #DDA9BF;
+        }
+
+        /* Pulsing 3D Heart Object Styles */
+        .heart-object {
+            width: 70px;
+            height: 70px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.6));
+        }
+
+        .heart-object:hover {
+            transform: scale(1.15) translateY(-8px);
+            filter: drop-shadow(0 15px 25px rgba(245, 201, 217, 0.6));
+        }
+
+        .heart-inner {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #F5C9D9 0%, #54243B 60%, #321323 100%);
+            clip-path: path('M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
+            transform: scale(3.2);
+            transform-origin: top left;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Flower Garden Animation Keyframes */
+        @keyframes stemGrow {
+            0% { height: 0; }
+            100% { height: 90px; }
+        }
+
+        @keyframes bloom {
+            0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .stem-anim {
+            animation: stemGrow 1.5s ease-out forwards;
+        }
+
+        .bloom-anim {
+            animation: bloom 1s 1.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+        }
+
+        /* Scratch Card Canvas */
+        #scratchCanvas {
+            touch-action: none;
+            cursor: crosshair;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #170B16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #54243B;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #DDA9BF;
+        }
+    </style>
+</head>
+<body class="bg-plum text-softtext selection:bg-winerose selection:text-softpink">
+
+    <!-- AUDIO SYSTEM (Synthesizer + Music Toggle) -->
+    <div class="fixed bottom-5 right-5 z-50 flex items-center gap-3">
+        <button id="musicToggleBtn" onclick="toggleBgMusic()" class="w-12 h-12 rounded-full glass-card border border-rosegold/40 flex items-center justify-center text-rosegold hover:text-softpink shadow-lg hover:scale-110 transition-all duration-300">
+            <i id="musicIcon" class="fas fa-music text-lg"></i>
+        </button>
+    </div>
+
+    <!-- GLOBAL POPUP MODAL CONTAINER -->
+    <div id="globalModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden transition-opacity duration-300 p-4">
+        <div class="relative max-w-lg w-full glass-card p-6 md:p-8 rounded-3xl border border-rosegold/40 shadow-2xl transform scale-95 transition-transform duration-300" id="modalContent">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-rosegold/70 hover:text-softpink text-xl transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="modalHeader" class="text-center mb-4">
+                <div id="modalIcon" class="w-16 h-16 mx-auto mb-3 rounded-full glass-card-light flex items-center justify-center text-3xl text-rosegold box-glow">
+                    ❤️
+                </div>
+                <h3 id="modalTitle" class="font-cinzel text-xl md:text-2xl text-softpink font-bold">Love Message</h3>
+            </div>
+            <div id="modalBody" class="font-serif text-lg text-softtext text-center leading-relaxed max-h-[60vh] overflow-y-auto px-2">
+                <!-- Message Dynamic Injection -->
+            </div>
+            <div class="mt-6 text-center">
+                <button onclick="closeModal()" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-winerose to-burgundy border border-rosegold/50 text-softpink font-medium hover:scale-105 active:scale-95 transition-all shadow-md">
+                    Keep In My Heart ❤️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div id="app" class="relative w-full min-h-screen">
+
+        <!-- ==========================================
+             1. CINEMATIC INTRODUCTION & LOGIN
+        ========================================== -->
+        <section id="loginSection" class="fixed inset-0 z-40 flex flex-col items-center justify-center bg-gradient-to-b from-plum via-burgundy to-plum overflow-hidden">
+            <!-- 3D Heart Canvas -->
+            <div id="canvas3dContainer" class="absolute inset-0 z-0"></div>
+            
+            <!-- Login Box Overlay -->
+            <div class="relative z-10 w-full max-w-md px-6 py-8 mx-4 glass-card rounded-3xl border border-rosegold/30 shadow-2xl text-center space-y-6">
+                <div class="space-y-2">
+                    <h1 class="font-cinzel text-2xl md:text-4xl text-softpink font-extrabold tracking-wide text-glow">
+                        Welcome My Love ❤️
+                    </h1>
+                    <p class="font-serif text-rosegold text-sm md:text-base italic">
+                        Your Little World Is Waiting For You.
+                    </p>
+                </div>
+
+                <!-- Form -->
+                <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 text-left">
+                    <div>
+                        <label class="block font-sans text-xs uppercase tracking-wider text-rosegold mb-1">Username</label>
+                        <div class="relative">
+                            <input type="text" id="usernameInput" value="Arooj" placeholder="Enter name" required
+                                class="w-full px-4 py-3 rounded-xl bg-darkmauve/80 border border-winerose text-softtext focus:outline-none focus:border-rosegold focus:ring-2 focus:ring-rosegold/40 transition-all font-sans text-sm">
+                            <i class="fas fa-user absolute right-4 top-3.5 text-rosegold/40"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-sans text-xs uppercase tracking-wider text-rosegold mb-1">Password</label>
+                        <div class="relative">
+                            <input type="password" id="passwordInput" placeholder="Enter special date code" required
+                                class="w-full px-4 py-3 rounded-xl bg-darkmauve/80 border border-winerose text-softtext focus:outline-none focus:border-rosegold focus:ring-2 focus:ring-rosegold/40 transition-all font-sans text-sm">
+                            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-4 top-3.5 text-rosegold/60 hover:text-softpink">
+                                <i id="eyeIcon" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <p id="loginError" class="text-xs text-red-400 hidden text-center font-sans">
+                        Incorrect username or password code! Try again my love.
+                    </p>
+
+                    <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-winerose via-burgundy to-winerose border border-rosegold/50 text-softpink font-cinzel font-bold text-base hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 box-glow mt-4">
+                        Unlock My Heart ❤️
+                    </button>
+                </form>
+            </div>
+
+            <!-- Login Success Screen Overlay -->
+            <div id="loginSuccessOverlay" class="absolute inset-0 z-20 bg-plum/95 backdrop-blur-xl flex flex-col items-center justify-center hidden p-6 text-center space-y-6">
+                <div class="w-24 h-24 rounded-full glass-card flex items-center justify-center text-5xl text-softpink box-glow animate-bounce">
+                    💖
+                </div>
+                <h2 class="font-cinzel text-3xl md:text-5xl text-softpink font-bold text-glow">
+                    Login Successful!
+                </h2>
+                <p class="font-serif text-xl md:text-2xl text-rosegold italic">
+                    You Are Ali's Wife ❤️
+                </p>
+                <button onclick="enterUniverse()" class="px-8 py-4 rounded-full bg-gradient-to-r from-winerose to-burgundy border-2 border-rosegold text-softtext font-cinzel font-bold text-lg hover:scale-105 transition-transform box-glow shadow-2xl">
+                    Enter Our Universe ✨
+                </button>
+            </div>
+        </section>
+
+        <!-- MAIN WEBSITE NAVIGATION BAR -->
+        <nav id="mainNav" class="fixed top-4 left-1/2 -translate-x-1/2 z-30 hidden">
+            <div class="px-6 py-2.5 glass-card rounded-full border border-rosegold/30 flex items-center gap-4 text-xs md:text-sm font-sans shadow-2xl">
+                <a href="#promiseSection" class="text-rosegold hover:text-softpink transition-colors">Promise</a>
+                <span class="text-winerose">•</span>
+                <a href="#careSection" class="text-rosegold hover:text-softpink transition-colors">Care</a>
+                <span class="text-winerose">•</span>
+                <a href="#letterSection" class="text-rosegold hover:text-softpink transition-colors">Letter</a>
+                <span class="text-winerose">•</span>
+                <a href="#journeySection" class="text-rosegold hover:text-softpink transition-colors">Journey</a>
+                <span class="text-winerose">•</span>
+                <a href="#universeSection" class="text-rosegold hover:text-softpink transition-colors">Universe</a>
+                <span class="text-winerose">•</span>
+                <a href="#activitiesSection" class="text-rosegold hover:text-softpink transition-colors">Activities</a>
+                <span class="text-winerose">•</span>
+                <a href="#treasureSection" class="text-rosegold hover:text-softpink transition-colors">Treasure</a>
+            </div>
+        </nav>
+
+        <!-- MAIN ROMANTIC CONTENT SECTIONS -->
+        <main id="mainContent" class="hidden opacity-0 transition-opacity duration-1000">
+
+            <!-- ==========================================
+                 2. SECTION: A PROMISE FROM ALI
+            ========================================== -->
+            <section id="promiseSection" class="min-h-screen py-24 px-4 relative flex flex-col items-center justify-center bg-gradient-to-b from-plum via-burgundy to-plum border-b border-winerose/20">
+                <div class="max-w-4xl w-full text-center space-y-12 relative z-10">
+                    <div class="space-y-4">
+                        <span class="px-4 py-1.5 rounded-full text-xs font-sans tracking-widest uppercase bg-winerose/40 border border-rosegold/30 text-rosegold">
+                            Sacred Vows
+                        </span>
+                        <h2 class="font-cinzel text-3xl md:text-5xl text-softpink font-bold text-glow">
+                            A Promise From Ali
+                        </h2>
+                        <p class="font-serif text-lg text-rosegold italic max-w-xl mx-auto">
+                            My heart belongs to you, and my words are bound to my soul. Click the three glowing heart locks below to reveal my sacred promises.
+                        </p>
+                    </div>
+
+                    <!-- 3 Heart Objects Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8">
+                        <!-- Heart Object 1 -->
+                        <div onclick="openPromiseMessage(1)" class="glass-card p-8 rounded-3xl border border-rosegold/30 flex flex-col items-center gap-4 cursor-pointer hover:border-rosegold transition-all group">
+                            <div class="heart-object">
+                                <div class="heart-inner"></div>
+                                <i class="fas fa-lock absolute inset-0 flex items-center justify-center text-rosegold text-xs group-hover:scale-125 transition-transform"></i>
+                            </div>
+                            <span class="font-cinzel text-sm text-softpink font-semibold tracking-wider">Promise I</span>
+                            <span class="text-xs text-rosegold/70">Click to unlock heart</span>
+                        </div>
+
+                        <!-- Heart Object 2 -->
+                        <div onclick="openPromiseMessage(2)" class="glass-card p-8 rounded-3xl border border-rosegold/30 flex flex-col items-center gap-4 cursor-pointer hover:border-rosegold transition-all group">
+                            <div class="heart-object">
+                                <div class="heart-inner"></div>
+                                <i class="fas fa-lock absolute inset-0 flex items-center justify-center text-rosegold text-xs group-hover:scale-125 transition-transform"></i>
+                            </div>
+                            <span class="font-cinzel text-sm text-softpink font-semibold tracking-wider">Promise II</span>
+                            <span class="text-xs text-rosegold/70">Click to unlock heart</span>
+                        </div>
+
+                        <!-- Heart Object 3 -->
+                        <div onclick="openPromiseMessage(3)" class="glass-card p-8 rounded-3xl border border-rosegold/30 flex flex-col items-center gap-4 cursor-pointer hover:border-rosegold transition-all group">
+                            <div class="heart-object">
+                                <div class="heart-inner"></div>
+                                <i class="fas fa-lock absolute inset-0 flex items-center justify-center text-rosegold text-xs group-hover:scale-125 transition-transform"></i>
+                            </div>
+                            <span class="font-cinzel text-sm text-softpink font-semibold tracking-wider">Promise III</span>
+                            <span class="text-xs text-rosegold/70">Click to unlock heart</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 3. SECTION: A LITTLE CARE FOR YOU
+            ========================================== -->
+            <section id="careSection" class="min-h-screen py-24 px-4 relative flex flex-col items-center justify-center bg-gradient-to-b from-plum via-darkmauve to-burgundy border-b border-winerose/20">
+                <!-- Gentle Backdrop Glow -->
+                <div class="absolute top-10 right-10 w-48 h-48 rounded-full bg-moonlight/10 blur-3xl pointer-events-none"></div>
+
+                <div class="max-w-4xl w-full text-center space-y-12 relative z-10">
+                    <div class="space-y-4">
+                        <span class="px-4 py-1.5 rounded-full text-xs font-sans tracking-widest uppercase bg-winerose/40 border border-rosegold/30 text-rosegold">
+                            Comfort & Solace
+                        </span>
+                        <h2 class="font-cinzel text-3xl md:text-5xl text-softpink font-bold text-glow">
+                            A Little Care For You
+                        </h2>
+                        <p class="font-serif text-lg text-rosegold italic max-w-xl mx-auto">
+                            Aap ke ye mushkil days over ho gaye hain. Aapki har takleef mein Ali Aapke saath hai. Touch the care hearts for comfort.
+                        </p>
+                    </div>
+
+                    <!-- 4 Care Heart Objects -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6">
+                        <div onclick="openCareMessage(1)" class="glass-card p-6 rounded-2xl border border-rosegold/30 flex flex-col items-center gap-3 cursor-pointer hover:scale-105 transition-all">
+                            <div class="heart-object">
+                                <div class="heart-inner"></div>
+                                <i class="fas fa-hand-holding-heart absolute inset-0 flex items-center justify-center text-rosegold text-xs"></i>
+                            </div>
+                            <span class="font-cinzel text-xs text-softpink font-semibold">Comfort 1</span>
+                        </div>
+
+                        <div onclick="openCareMessage(2)" class="glass-card p-6 rounded-2xl border border-rosegold/30 flex flex-col items-center gap-3 cursor-pointer hover:scale-105 transition-all">
+                            <div class="heart-object">
+                                <div class="heart-inner"></div>
+                                <i class="fas fa-cloud-moon absolute inset-0 flex items-center justify-center text-rosegold text-xs"></i>
+                            </div>
+                            <span class="font-cinzel text-xs text-softpink font-semibold">Comfort 2</span>
+                        </div>
+
+                        <div onclick="openCareMessage(3)" class="glass-card p-6 rounded-2xl border border-rosegold/30 flex flex-col items-center gap-3 cursor-pointer hover:scale-105 transition-all">
+                            <div class="heart-object">
+                                <div class="heart-inner"></div>
+                                <i class="fas fa-smile-beam absolute inset-0 flex items-center justify-center text-rosegold text-xs"></i>
+                            </div>
+                            <span class="font-cinzel text-xs text-softpink font-semibold">Comfort 3</span>
+                        </div>
+
+                        <div onclick="openCareMessage(4)" class="glass-card p-6 rounded-2xl border border-rosegold/30 flex flex-col items-center gap-3 cursor-pointer hover:scale-105 transition-all">
+                            <div class="heart-object">
+                                <div class="heart-inner"></div>
+                                <i class="fas fa-sun absolute inset-0 flex items-center justify-center text-rosegold text-xs"></i>
+                            </div>
+                            <span class="font-cinzel text-xs text-softpink font-semibold">Comfort 4</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 4. SECTION: A LETTER FROM ALI
+            ========================================== -->
+            <section id="letterSection" class="min-h-screen py-24 px-4 relative flex flex-col items-center justify-center bg-plum border-b border-winerose/20 overflow-hidden">
+                <div class="max-w-4xl w-full text-center space-y-8 relative z-10">
+                    <div class="space-y-3">
+                        <span class="px-4 py-1.5 rounded-full text-xs font-sans tracking-widest uppercase bg-winerose/40 border border-rosegold/30 text-rosegold">
+                            From Ali's Soul
+                        </span>
+                        <h2 class="font-cinzel text-3xl md:text-5xl text-softpink font-bold text-glow">
+                            A Letter From Ali
+                        </h2>
+                        <p class="font-serif text-sm md:text-base text-rosegold italic">
+                            Click the wax seal to break open the sealed letter written specifically for you.
+                        </p>
+                    </div>
+
+                    <!-- Interactive Envelope Container -->
+                    <div class="envelope-wrapper my-12 flex justify-center items-center">
+                        <div id="envelopeObj" class="envelope">
+                            <div id="envelopeFlap" class="envelope-flap"></div>
+                            <div class="envelope-pocket"></div>
+                            
+                            <!-- Heart Wax Seal -->
+                            <div id="waxSeal" onclick="openPhysicalLetter()" class="wax-seal">
+                                <i class="fas fa-heart text-rosegold text-lg"></i>
+                            </div>
+
+                            <!-- Physical Paper Letter inside envelope -->
+                            <div id="letterPaper" class="letter-paper">
+                                <div class="border-2 border-winerose/20 p-4 h-full rounded flex flex-col justify-between">
+                                    <div class="text-left font-serif text-base md:text-lg text-slate-800 space-y-4 leading-relaxed">
+                                        <p class="font-bold text-winerose">Meri Pyaari Arooj,</p>
+                                        <p>Sab se pehle tou meri ladli ke ye days over ho gaye, shukar hai. Mein bohat khush hoon ke ye time jaldi guzar gaya. 😭🫶🏻</p>
+                                        <p>Secondly, meri jaan, ayinda wo reel wala scene dobara nahi hoga. Pakka wala promise, meri jaan. Bas Aap ne happy rehna hai.</p>
+                                        <p>Meri jaan, Aap meri zindagi ka woh hissa hain jiske bina har khushi adhoori lagti hai. Aapki ek choti si smile mere poore din ko khoobsurat bana deti hai.</p>
+                                        <p>Kabhi kabhi dil karta hai ke waqt ko wahin rok doon jahan Aap mere saath hon aur hum dono bas ek doosre ke saath khush hon.</p>
+                                        <p>Meri ladli, mein chahta hoon ke Aapke saath itni khoobsurat memories banaun ke jab bhi hum peeche mur kar dekhein tou chehre par smile aa jaye.</p>
+                                        <p>Aap meri favourite or special person hain, aur mein har guzarte din ke saath Aapko aur zyada pyaar karna chahta hun 🥹🫶🏻</p>
+                                    </div>
+                                    <div class="mt-6 text-right font-serif italic font-bold text-winerose">
+                                        Hamesha Aapka,<br>Ali ❤️
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="closeLetterBtn" onclick="closePhysicalLetter()" class="px-6 py-2 rounded-full glass-card border border-rosegold text-softpink font-sans text-xs hidden">
+                        Fold & Put Letter Back
+                    </button>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 5. SECTION: OUR JOURNEY & DATES
+            ========================================== -->
+            <section id="journeySection" class="min-h-screen py-24 px-4 relative flex flex-col items-center justify-center bg-gradient-to-b from-plum via-burgundy to-plum border-b border-winerose/20">
+                <div class="max-w-4xl w-full text-center space-y-12 relative z-10">
+                    <div class="space-y-4">
+                        <span class="px-4 py-1.5 rounded-full text-xs font-sans tracking-widest uppercase bg-winerose/40 border border-rosegold/30 text-rosegold">
+                            Milestones of Love
+                        </span>
+                        <h2 class="font-cinzel text-3xl md:text-5xl text-softpink font-bold text-glow">
+                            Our Journey & Cherished Dates
+                        </h2>
+                        <p class="font-serif text-lg text-rosegold italic">
+                            Every milestone with you is etched into my soul forever.
+                        </p>
+                    </div>
+
+                    <!-- Vertical Timeline -->
+                    <div class="relative border-l-2 border-rosegold/30 ml-4 md:ml-32 space-y-12 text-left">
+                        <!-- Date 1 -->
+                        <div class="relative pl-8 md:pl-12 group">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-rosegold border-4 border-plum group-hover:scale-150 transition-transform"></div>
+                            <div class="glass-card p-6 rounded-2xl border border-rosegold/30 space-y-3 max-w-lg">
+                                <span class="text-xs font-bold font-sans text-rosegold uppercase tracking-widest">21 February | 5:35 PM</span>
+                                <h3 class="font-cinzel text-xl text-softpink font-bold">Our First Message</h3>
+                                <div class="w-full h-48 rounded-xl overflow-hidden border border-rosegold/20 bg-darkmauve flex items-center justify-center">
+                                    <!-- img1.jpg with Fallback placeholder -->
+                                    <img src="img1.jpg" onerror="this.onerror=null; this.src='https://placehold.co/600x400/321323/F5C9D9?text=Our+First+Message+❤️';" alt="Our First Message" class="w-full h-full object-cover">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date 2 -->
+                        <div class="relative pl-8 md:pl-12 group">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-rosegold border-4 border-plum group-hover:scale-150 transition-transform"></div>
+                            <div class="glass-card p-6 rounded-2xl border border-rosegold/30 space-y-2 max-w-lg">
+                                <span class="text-xs font-bold font-sans text-rosegold uppercase tracking-widest">12 August | 11:30 PM</span>
+                                <h3 class="font-cinzel text-xl text-softpink font-bold">When We Built a Deeper Connection</h3>
+                                <p class="font-serif text-sm text-softtext/80 italic">The night our hearts bonded beyond words.</p>
+                            </div>
+                        </div>
+
+                        <!-- Date 3 -->
+                        <div class="relative pl-8 md:pl-12 group">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-rosegold border-4 border-plum group-hover:scale-150 transition-transform"></div>
+                            <div class="glass-card p-6 rounded-2xl border border-rosegold/30 space-y-2 max-w-lg">
+                                <span class="text-xs font-bold font-sans text-rosegold uppercase tracking-widest">6 October</span>
+                                <h3 class="font-cinzel text-xl text-softpink font-bold">The Day You Told Your Api</h3>
+                                <p class="font-serif text-sm text-softtext/80 italic">A major courage step in our love story.</p>
+                            </div>
+                        </div>
+
+                        <!-- Date 4 -->
+                        <div class="relative pl-8 md:pl-12 group">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-rosegold border-4 border-plum group-hover:scale-150 transition-transform"></div>
+                            <div class="glass-card p-6 rounded-2xl border border-rosegold/30 space-y-2 max-w-lg">
+                                <span class="text-xs font-bold font-sans text-rosegold uppercase tracking-widest">1 November</span>
+                                <h3 class="font-cinzel text-xl text-softpink font-bold">The Day You Told Your Mother</h3>
+                                <p class="font-serif text-sm text-softtext/80 italic">A sacred step towards our eternal union.</p>
+                            </div>
+                        </div>
+
+                        <!-- Date 5 -->
+                        <div class="relative pl-8 md:pl-12 group">
+                            <div class="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-rosegold border-4 border-plum group-hover:scale-150 transition-transform"></div>
+                            <div class="glass-card p-6 rounded-2xl border border-rosegold/30 space-y-2 max-w-lg">
+                                <span class="text-xs font-bold font-sans text-rosegold uppercase tracking-widest">4 November</span>
+                                <h3 class="font-cinzel text-xl text-softpink font-bold">The Day I Told My Mother</h3>
+                                <p class="font-serif text-sm text-softtext/80 italic">Declaring my devotion to my family for you.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden Timeline Hearts -->
+                    <div class="flex justify-center gap-6 pt-6">
+                        <button onclick="openDateMessage(1)" class="w-12 h-12 rounded-full glass-card border border-rosegold/40 flex items-center justify-center text-rosegold hover:scale-110 transition-transform">
+                            ❤️
+                        </button>
+                        <button onclick="openDateMessage(2)" class="w-12 h-12 rounded-full glass-card border border-rosegold/40 flex items-center justify-center text-rosegold hover:scale-110 transition-transform">
+                            💖
+                        </button>
+                        <button onclick="openDateMessage(3)" class="w-12 h-12 rounded-full glass-card border border-rosegold/40 flex items-center justify-center text-rosegold hover:scale-110 transition-transform">
+                            💕
+                        </button>
+                    </div>
+
+                    <p class="font-cinzel text-lg text-softpink font-bold pt-4 text-glow">
+                        "These are very special days. I will never forget them."
+                    </p>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 6. NEW MAJOR SECTION: OUR LITTLE UNIVERSE
+            ========================================== -->
+            <section id="universeSection" class="min-h-screen py-24 px-4 relative flex flex-col items-center justify-center bg-nightblue border-b border-winerose/20 overflow-hidden">
+                <!-- Glowing Moon -->
+                <div class="absolute top-12 right-12 w-32 h-32 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-moonlight via-softpink/40 to-transparent box-glow opacity-80 pointer-events-none"></div>
+
+                <!-- Layered SVG Silhouette Mountains -->
+                <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-0 pointer-events-none opacity-40">
+                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-48 text-plum fill-current">
+                        <path d="M0,0 C150,90 350,-40 500,60 C650,160 900,10 1200,40 L1200,120 L0,120 Z"></path>
+                    </svg>
+                </div>
+
+                <div class="max-w-4xl w-full text-center space-y-12 relative z-10">
+                    <div class="space-y-4">
+                        <span class="px-4 py-1.5 rounded-full text-xs font-sans tracking-widest uppercase bg-winerose/40 border border-rosegold/30 text-rosegold">
+                            Cosmic Sanctuary
+                        </span>
+                        <h2 class="font-cinzel text-3xl md:text-5xl text-softpink font-bold text-glow">
+                            Our Little Universe
+                        </h2>
+                        <p class="font-serif text-lg text-rosegold italic">
+                            A universe crafted by Ali for Arooj. Connect the stars below to illuminate our love constellation.
+                        </p>
+                    </div>
+
+                    <!-- Interactive Constellation Canvas -->
+                    <div class="glass-card p-6 rounded-3xl border border-rosegold/30 max-w-xl mx-auto space-y-4">
+                        <div class="flex justify-between items-center text-xs font-sans text-rosegold px-2">
+                            <span>Interactive Constellation</span>
+                            <span id="constellationStatus">Connect all 5 stars</span>
+                        </div>
+                        <canvas id="constellationCanvas" width="500" height="300" class="w-full h-64 rounded-2xl bg-plum/60 border border-winerose/30 cursor-pointer"></canvas>
+                    </div>
+
+                    <!-- Floating 3D Universe Heart Button -->
+                    <div class="pt-6">
+                        <button onclick="openUniverseHeartMessage()" class="px-8 py-4 rounded-full glass-card border border-rosegold text-softpink font-cinzel font-bold text-lg hover:scale-105 transition-transform box-glow">
+                            ✨ Open Central Universe Heart ✨
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 7. SECTION: INTERACTIVE LOVE ACTIVITIES
+            ========================================== -->
+            <section id="activitiesSection" class="min-h-screen py-24 px-4 relative flex flex-col items-center justify-center bg-gradient-to-b from-plum via-burgundy to-plum border-b border-winerose/20">
+                <div class="max-w-5xl w-full text-center space-y-16 relative z-10">
+                    <div class="space-y-4">
+                        <span class="px-4 py-1.5 rounded-full text-xs font-sans tracking-widest uppercase bg-winerose/40 border border-rosegold/30 text-rosegold">
+                            Playful Devotion
+                        </span>
+                        <h2 class="font-cinzel text-3xl md:text-5xl text-softpink font-bold text-glow">
+                            Interactive Love Activities
+                        </h2>
+                        <p class="font-serif text-lg text-rosegold italic">
+                            8 unique activities created for your joy. Play and unlock sweet love surprises!
+                        </p>
+                    </div>
+
+                    <!-- 8 Activities Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                        <!-- ACTIVITY 1: UNLOCK MY HEART (Drag & Drop Key) -->
+                        <div class="glass-card p-6 rounded-3xl border border-rosegold/30 text-left space-y-4">
+                            <h3 class="font-cinzel text-lg text-softpink font-bold flex items-center gap-2">
+                                <i class="fas fa-key text-rosegold"></i> 1. Unlock My Heart
+                            </h3>
+                            <p class="text-xs text-rosegold font-sans">Drag the key into the heart lock hole to unlock!</p>
+                            <div id="dragKeyZone" class="h-40 rounded-2xl bg-darkmauve/60 border border-winerose flex items-center justify-around relative">
+                                <div id="draggableKey" draggable="true" ondragstart="onKeyDragStart(event)" class="w-12 h-12 rounded-full bg-rosegold text-plum flex items-center justify-center text-xl cursor-grab active:cursor-grabbing shadow-lg">
+                                    🔑
+                                </div>
+                                <div id="keyDropTarget" ondragover="event.preventDefault()" ondrop="onKeyDrop(event)" class="w-16 h-16 rounded-full border-2 border-dashed border-rosegold flex items-center justify-center text-2xl text-rosegold">
+                                    🔒
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ACTIVITY 2: COLLECT MY LOVE -->
+                        <div class="glass-card p-6 rounded-3xl border border-rosegold/30 text-left space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-cinzel text-lg text-softpink font-bold flex items-center gap-2">
+                                    <i class="fas fa-heart text-rosegold"></i> 2. Collect My Love
+                                </h3>
+                                <span id="collectedCounter" class="text-xs font-sans text-rosegold font-bold">0 / 5 Collected</span>
+                            </div>
+                            <p class="text-xs text-rosegold font-sans">Click all 5 glowing hearts hidden in the box!</p>
+                            <div id="heartCollectContainer" class="h-40 rounded-2xl bg-darkmauve/60 border border-winerose relative overflow-hidden flex items-center justify-around">
+                                <button onclick="collectHeart(this, 1)" class="text-2xl hover:scale-125 transition-transform">💖</button>
+                                <button onclick="collectHeart(this, 2)" class="text-2xl hover:scale-125 transition-transform">💕</button>
+                                <button onclick="collectHeart(this, 3)" class="text-2xl hover:scale-125 transition-transform">💗</button>
+                                <button onclick="collectHeart(this, 4)" class="text-2xl hover:scale-125 transition-transform">💓</button>
+                                <button onclick="collectHeart(this, 5)" class="text-2xl hover:scale-125 transition-transform">❤️</button>
+                            </div>
+                        </div>
+
+                        <!-- ACTIVITY 3: OPEN YOUR SURPRISE -->
+                        <div class="glass-card p-6 rounded-3xl border border-rosegold/30 text-left space-y-4">
+                            <h3 class="font-cinzel text-lg text-softpink font-bold flex items-center gap-2">
+                                <i class="fas fa-gift text-rosegold"></i> 3. Open Your Surprise
+                            </h3>
+                            <p class="text-xs text-rosegold font-sans">Choose any gift box to unwrap!</p>
+                            <div class="h-40 rounded-2xl bg-darkmauve/60 border border-winerose flex items-center justify-around">
+                                <button onclick="openGiftSurprise(1)" class="text-4xl hover:scale-110 transition-transform">🎁</button>
+                                <button onclick="openGiftSurprise(2)" class="text-4xl hover:scale-110 transition-transform">🎀</button>
+                                <button onclick="openGiftSurprise(3)" class="text-4xl hover:scale-110 transition-transform">📦</button>
+                            </div>
+                        </div>
+
+                        <!-- ACTIVITY 4: SCRATCH MY MESSAGE -->
+                        <div class="glass-card p-6 rounded-3xl border border-rosegold/30 text-left space-y-4">
+                            <h3 class="font-cinzel text-lg text-softpink font-bold flex items-center gap-2">
+                                <i class="fas fa-hand-sparkles text-rosegold"></i> 4. Scratch My Message
+                            </h3>
+                            <p class="text-xs text-rosegold font-sans">Scratch off the silver layer to reveal note!</p>
+                            <div class="relative h-40 rounded-2xl overflow-hidden border border-winerose bg-winerose/40 flex items-center justify-center text-center p-4">
+                                <div class="font-serif text-sm text-softpink font-semibold">
+                                    "Aap meri zindagi ka sab se khoobsurat tohfa hain! ❤️"
+                                </div>
+                                <canvas id="scratchCanvas" width="400" height="160" class="absolute inset-0 w-full h-full"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- ACTIVITY 5: SPIN FOR LOVE -->
+                        <div class="glass-card p-6 rounded-3xl border border-rosegold/30 text-left space-y-4">
+                            <h3 class="font-cinzel text-lg text-softpink font-bold flex items-center gap-2">
+                                <i class="fas fa-dharmachakra text-rosegold"></i> 5. Spin For Love
+                            </h3>
+                            <div class="flex items-center gap-4">
+                                <div class="relative w-32 h-32 rounded-full border-4 border-rosegold overflow-hidden flex items-center justify-center">
+                                    <div id="wheelElem" class="w-full h-full rounded-full bg-gradient-to-tr from-winerose via-burgundy to-rosegold transition-transform duration-3000"></div>
+                                    <i class="fas fa-caret-down absolute top-0 text-softpink text-xl z-10"></i>
+                                </div>
+                                <button onclick="spinWheel()" class="px-4 py-2 rounded-xl bg-winerose text-softpink border border-rosegold text-xs font-bold hover:scale-105">
+                                    Spin Wheel 🎡
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ACTIVITY 6: CONNECT OUR STARS -->
+                        <div class="glass-card p-6 rounded-3xl border border-rosegold/30 text-left space-y-4">
+                            <h3 class="font-cinzel text-lg text-softpink font-bold flex items-center gap-2">
+                                <i class="fas fa-star text-rosegold"></i> 6. Connect Our Stars
+                            </h3>
+                            <p class="text-xs text-rosegold font-sans">Click to connect cosmic nodes into love!</p>
+                            <button onclick="triggerStarPuzzle()" class="w-full py-6 rounded-2xl bg-darkmauve/60 border border-winerose text-rosegold hover:text-softpink font-serif italic text-sm">
+                                ✨ Click here to draw star constellation ✨
+                            </button>
+                        </div>
+
+                        <!-- ACTIVITY 7: GROW OUR LOVE GARDEN -->
+                        <div class="glass-card p-6 rounded-3xl border border-rosegold/30 text-left space-y-4">
+                            <h3 class="font-cinzel text-lg text-softpink font-bold flex items-center gap-2">
+                                <i class="fas fa-seedling text-rosegold"></i> 7. Grow Our Love Garden
+                            </h3>
+                            <p class="text-xs text-rosegold font-sans">Click soil patches to plant & bloom flowers!</p>
+                            <div class="grid grid-cols-3 gap-2 h-36">
+                                <div onclick="plantFlower(this)" class="bg-darkmauve/80 rounded-xl border border-winerose/40 flex items-center justify-center cursor-pointer text-xl">🌱</div>
+                                <div onclick="plantFlower(this)" class="bg-darkmauve/80 rounded-xl border border-winerose/40 flex items-center justify-center cursor-pointer text-xl">🌱</div>
+                                <div onclick="plantFlower(this)" class="bg-darkmauve/80 rounded-xl border border-winerose/40 flex items-center justify-center cursor-pointer text-xl">🌱</div>
+                            </div>
+                        </div>
+
+                        <!-- ACTIVITY 8: OUR LITTLE LOVE MISSION -->
+                        <div class="glass-card p-6 rounded-3xl border border-rosegold/30 text-left space-y-4">
+                            <h3 class="font-cinzel text-lg text-softpink font-bold flex items-center gap-2">
+                                <i class="fas fa-tasks text-rosegold"></i> 8. Our Little Love Mission
+                            </h3>
+                            <div class="space-y-2 text-xs font-sans">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" onchange="updateMissionProgress()" class="rounded accent-winerose">
+                                    <span>Smile right now for Ali 😊</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" onchange="updateMissionProgress()" class="rounded accent-winerose">
+                                    <span>Drink a glass of warm water 🥛</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" onchange="updateMissionProgress()" class="rounded accent-winerose">
+                                    <span>Know that Ali loves you unconditionally ❤️</span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 8. FINAL SECTION: 25 LOVE LETTERS TREASURE BOX
+            ========================================== -->
+            <section id="treasureSection" class="min-h-screen py-24 px-4 relative flex flex-col items-center justify-center bg-gradient-to-b from-plum via-darkmauve to-plum border-b border-winerose/20">
+                <div class="max-w-5xl w-full text-center space-y-12 relative z-10">
+                    <div class="space-y-4">
+                        <span class="px-4 py-1.5 rounded-full text-xs font-sans tracking-widest uppercase bg-winerose/40 border border-rosegold/30 text-rosegold">
+                            Eternal Treasury
+                        </span>
+                        <h2 class="font-cinzel text-3xl md:text-5xl text-softpink font-bold text-glow">
+                            25 Love Letters Treasure Box
+                        </h2>
+                        <p class="font-serif text-lg text-rosegold italic">
+                            Unlock the chest to reveal 25 sealed romantic letters written for my wife.
+                        </p>
+                    </div>
+
+                    <!-- Treasure Chest Object -->
+                    <div class="flex flex-col items-center space-y-6">
+                        <div id="treasureChestObj" onclick="openTreasureChest()" class="w-48 h-36 md:w-64 md:h-48 rounded-3xl bg-gradient-to-b from-winerose to-burgundy border-4 border-rosegold box-glow flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition-transform relative group">
+                            <i id="chestLockIcon" class="fas fa-lock text-4xl text-rosegold group-hover:scale-125 transition-transform"></i>
+                            <span id="chestStatusText" class="font-cinzel text-xs text-softpink font-bold mt-2">Click to Unlock Chest</span>
+                        </div>
+
+                        <!-- Progress Counter -->
+                        <div id="chestProgress" class="font-sans text-sm text-rosegold font-semibold hidden">
+                            <span id="openedLettersCount">0</span> of 25 Letters Opened
+                        </div>
+                    </div>
+
+                    <!-- 25 Letters Grid -->
+                    <div id="lettersGrid" class="grid grid-cols-5 md:grid-cols-5 gap-3 max-w-2xl mx-auto hidden pt-6">
+                        <!-- Letters JS Rendered Here -->
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        // CENTRALIZED LOVE MESSAGES CONFIGURATION (41 Total Messages Allocation)
+        const LOVE_MESSAGES = {
+            promises: [
+                "Meri jaan, reel wala scene dobara nahi hoga. Pakka wala promise, my love! Bas Aap ne hamesha happy rehna hai.",
+                "Aapki har ek choti si smile mere liye duniya ki sab se qeemti cheez hai. Mein Aapko kabhi udaas nahi dekh sakta.",
+                "Hamesha Aapke saath rehna, Aapki izzat karna aur Aapko har pal khush rakhna Ali ki zindagi ka waheed maqsad hai."
+            ],
+            care: [
+                "Aap ke ye days over ho gaye, shukar hai Rab ka. Mein bohat khush hoon ke ye mushkil time jaldi guzar gaya. 😭🫶🏻",
+                "Aapki har takleef meri takleef hai. Jab Aap pain mein hoti hain tou mera dil rota hai. Hamesha apna khayal rakhein, meri ladli.",
+                "Aap meri zindagi ka woh khoobsurat hissa hain jiske bina meri har khushi adhoori lagti hai. Rest properly my queen.",
+                "Mein har guzarte din ke saath Aapko pehle se bhi zyada pyaar karna chahta hoon. Aap mere liye boht special hain. ❤️"
+            ],
+            dates: [
+                "21 Feb - The moment my life changed forever when we sent our first message.",
+                "12 Aug - The magical night our souls connected deeply.",
+                "6 Oct & 1 Nov & 4 Nov - The brave milestones when our families learned about our sacred love."
+            ],
+            activities: [
+                "Key Unlocked: You hold the key to Ali's heart forever!",
+                "Hearts Collected: All my love belongs to you, Arooj!",
+                "Surprise Box: You are the best thing that ever happened to me!",
+                "Scratch Note: Aap meri zindagi ka sab se khoobsurat tohfa hain!",
+                "Spin Wheel: Infinite Love & Devotion Won!",
+                "Garden Bloomed: Our love blossoms more beautifully every single day!"
+            ],
+            treasure: Array.from({length: 25}, (_, i) => `Letter #${i+1}: Meri jaan Arooj, Aap Ali ka pehla aur aakhri pyaar hain. Har din Aapke saath ek haseen khwab jaisa hai. Hamesha Ali ke dil mein rahein. ❤️`)
+        };
+
+        // AUDIO SYNTHESIZER (Web Audio API)
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function playSoundEffect(type) {
+            try {
+                if (!audioCtx) audioCtx = new AudioCtx();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.1);
+                } else if (type === 'unlock') {
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.2); // E5
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.log("Web Audio initialized on click.");
+            }
+        }
+
+        // BACKGROUND MUSIC TOGGLE
+        let isMusicPlaying = false;
+        function toggleBgMusic() {
+            const icon = document.getElementById('musicIcon');
+            isMusicPlaying = !isMusicPlaying;
+            playSoundEffect('click');
+            if (isMusicPlaying) {
+                icon.className = "fas fa-volume-up text-lg text-softpink";
+            } else {
+                icon.className = "fas fa-music text-lg text-rosegold";
+            }
+        }
+
+        // THREE.JS 3D HEART LOGIN BACKGROUND
+        let scene, camera, renderer, heartMesh;
+
+        function init3DHeart() {
+            const container = document.getElementById('canvas3dContainer');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 4;
+
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // 3D Heart Geometry Shape
+            const x = 0, y = 0;
+            const heartShape = new THREE.Shape();
+            heartShape.moveTo(x + 0.5, y + 0.5);
+            heartShape.bezierCurveTo(x + 0.5, y + 0.5, x + 0.4, y, x, y);
+            heartShape.bezierCurveTo(x - 0.6, y, x - 0.6, y + 0.7, x - 0.6, y + 0.7);
+            heartShape.bezierCurveTo(x - 0.6, y + 1.1, x - 0.3, y + 1.54, x + 0.5, y + 1.9);
+            heartShape.bezierCurveTo(x + 1.3, y + 1.54, x + 1.6, y + 1.1, x + 1.6, y + 0.7);
+            heartShape.bezierCurveTo(x + 1.6, y, x + 1.4, y, x + 1, y);
+            heartShape.bezierCurveTo(x + 0.7, y, x + 0.5, y + 0.5, x + 0.5, y + 0.5);
+
+            const extrudeSettings = { depth: 0.4, bevelEnabled: true, bevelSegments: 3, steps: 2, bevelSize: 0.1, bevelThickness: 0.1 };
+            const geometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
+            geometry.center();
+
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x54243B,
+                emissive: 0x321323,
+                specular: 0xDDA9BF,
+                shininess: 100
+            });
+
+            heartMesh = new THREE.Mesh(geometry, material);
+            heartMesh.rotation.x = Math.PI;
+            scene.add(heartMesh);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0xF5C9D9, 1.5, 100);
+            pointLight.position.set(2, 2, 5);
+            scene.add(pointLight);
+
+            animate3D();
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            if (heartMesh) {
+                heartMesh.rotation.y += 0.01;
+                const scale = 1 + Math.sin(Date.now() * 0.003) * 0.05;
+                heartMesh.scale.set(scale, scale, scale);
+            }
+            renderer.render(scene, camera);
+        }
+
+        // LOGIN AUTHENTICATION LOGIC
+        function togglePasswordVisibility() {
+            const pwd = document.getElementById('passwordInput');
+            const icon = document.getElementById('eyeIcon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                pwd.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('usernameInput').value.trim();
+            const pass = document.getElementById('passwordInput').value.trim();
+            const err = document.getElementById('loginError');
+
+            playSoundEffect('click');
+            if (user === 'Arooj' && pass === '2610.2812') {
+                err.classList.add('hidden');
+                playSoundEffect('unlock');
+                document.getElementById('loginSuccessOverlay').classList.remove('hidden');
+            } else {
+                err.classList.remove('hidden');
+            }
+        }
+
+        function enterUniverse() {
+            playSoundEffect('unlock');
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('mainNav').classList.remove('hidden');
+            const main = document.getElementById('mainContent');
+            main.classList.remove('hidden');
+            setTimeout(() => main.classList.remove('opacity-0'), 50);
+
+            // Init Canvas Scratch & Constellation
+            initScratchCanvas();
+            initConstellation();
+        }
+
+        // GLOBAL MODAL POPUP SYSTEM
+        function openModal(title, message, icon = '❤️') {
+            playSoundEffect('unlock');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalBody').innerText = message;
+            document.getElementById('modalIcon').innerText = icon;
+            const modal = document.getElementById('globalModal');
+            modal.classList.remove('hidden');
+            confetti({ particleCount: 40, spread: 60, origin: { y: 0.6 } });
+        }
+
+        function closeModal() {
+            playSoundEffect('click');
+            document.getElementById('globalModal').classList.add('hidden');
+        }
+
+        // PROMISE & CARE HANDLERS
+        function openPromiseMessage(index) {
+            openModal(`Ali's Promise #${index}`, LOVE_MESSAGES.promises[index - 1], '💍');
+        }
+
+        function openCareMessage(index) {
+            openModal(`Care Note #${index}`, LOVE_MESSAGES.care[index - 1], '🌸');
+        }
+
+        function openDateMessage(index) {
+            openModal(`Cherished Memory`, LOVE_MESSAGES.dates[index - 1], '📅');
+        }
+
+        function openUniverseHeartMessage() {
+            openModal(`Center of Our Universe`, "Arooj, you are the gravitational force that holds Ali's universe together. Forever & always.", '✨');
+        }
+
+        // PHYSICAL ENVELOPE UNFOLDING EXPERIENCE
+        let isLetterOpen = false;
+        function openPhysicalLetter() {
+            if (isLetterOpen) return;
+            isLetterOpen = true;
+            playSoundEffect('unlock');
+
+            document.getElementById('waxSeal').style.transform = 'translate(-50%, -50%) scale(0)';
+            document.getElementById('envelopeFlap').style.transform = 'rotateX(180deg)';
+            
+            setTimeout(() => {
+                const letter = document.getElementById('letterPaper');
+                letter.classList.add('unfolded');
+                document.getElementById('closeLetterBtn').classList.remove('hidden');
+                confetti({ particleCount: 70, spread: 80, origin: { y: 0.5 } });
+            }, 600);
+        }
+
+        function closePhysicalLetter() {
+            playSoundEffect('click');
+            const letter = document.getElementById('letterPaper');
+            letter.classList.remove('unfolded');
+            document.getElementById('closeLetterBtn').classList.add('hidden');
+            
+            setTimeout(() => {
+                document.getElementById('envelopeFlap').style.transform = 'rotateX(0deg)';
+                document.getElementById('waxSeal').style.transform = 'translate(-50%, -50%) scale(1)';
+                isLetterOpen = false;
+            }, 600);
+        }
+
+        // CONSTELLATION CANVAS MINI-GAME
+        let constCanvas, constCtx;
+        let stars = [
+            {x: 100, y: 80, connected: false},
+            {x: 200, y: 200, connected: false},
+            {x: 300, y: 70, connected: false},
+            {x: 400, y: 190, connected: false},
+            {x: 250, y: 250, connected: false}
+        ];
+        let connectedCount = 0;
+
+        function initConstellation() {
+            constCanvas = document.getElementById('constellationCanvas');
+            if (!constCanvas) return;
+            constCtx = constCanvas.getContext('2d');
+            drawConstellation();
+
+            constCanvas.addEventListener('click', (e) => {
+                const rect = constCanvas.getBoundingClientRect();
+                const clickX = (e.clientX - rect.left) * (constCanvas.width / rect.width);
+                const clickY = (e.clientY - rect.top) * (constCanvas.height / rect.height);
+
+                stars.forEach(s => {
+                    if (!s.connected && Math.hypot(s.x - clickX, s.y - clickY) < 30) {
+                        s.connected = true;
+                        connectedCount++;
+                        playSoundEffect('click');
+                    }
+                });
+                drawConstellation();
+
+                if (connectedCount === stars.length) {
+                    document.getElementById('constellationStatus').innerText = "Constellation Completed!";
+                    openModal("Star Constellation Unlocked", "You connected all the stars into a heart! Ali's love for you shines brighter than all constellations.", "🌟");
+                }
+            });
+        }
+
+        function drawConstellation() {
+            constCtx.clearRect(0, 0, constCanvas.width, constCanvas.height);
+            
+            // Draw connecting glowing lines
+            constCtx.beginPath();
+            let first = true;
+            stars.forEach(s => {
+                if (s.connected) {
+                    if (first) { constCtx.moveTo(s.x, s.y); first = false; }
+                    else { constCtx.lineTo(s.x, s.y); }
+                }
+            });
+            constCtx.strokeStyle = '#DDA9BF';
+            constCtx.lineWidth = 3;
+            constCtx.shadowColor = '#F5C9D9';
+            constCtx.shadowBlur = 10;
+            constCtx.stroke();
+
+            // Draw Stars
+            stars.forEach(s => {
+                constCtx.beginPath();
+                constCtx.arc(s.x, s.y, s.connected ? 10 : 6, 0, Math.PI * 2);
+                constCtx.fillStyle = s.connected ? '#F5C9D9' : '#54243B';
+                constCtx.fill();
+            });
+        }
+
+        // ACTIVITIES HANDLERS
+        function onKeyDragStart(e) {
+            e.dataTransfer.setData("text", "key");
+        }
+
+        function onKeyDrop(e) {
+            e.preventDefault();
+            playSoundEffect('unlock');
+            openModal("Heart Unlocked", LOVE_MESSAGES.activities[0], "🔑");
+        }
+
+        let collectedHearts = 0;
+        function collectHeart(btn, id) {
+            btn.style.opacity = '0.2';
+            btn.disabled = true;
+            collectedHearts++;
+            playSoundEffect('click');
+            document.getElementById('collectedCounter').innerText = `${collectedHearts} / 5 Collected`;
+            if (collectedHearts === 5) {
+                openModal("All Love Hearts Collected", LOVE_MESSAGES.activities[1], "💖");
+            }
+        }
+
+        function openGiftSurprise(num) {
+            openModal(`Gift Surprise #${num}`, LOVE_MESSAGES.activities[2], "🎁");
+        }
+
+        // SCRATCH CARD CANVAS
+        function initScratchCanvas() {
+            const canvas = document.getElementById('scratchCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#DDA9BF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let isScratching = false;
+
+            function scratch(e) {
+                if (!isScratching) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, 16, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            canvas.addEventListener('mousedown', () => isScratching = true);
+            canvas.addEventListener('mouseup', () => isScratching = false);
+            canvas.addEventListener('mousemove', scratch);
+            canvas.addEventListener('touchstart', () => isScratching = true);
+            canvas.addEventListener('touchend', () => isScratching = false);
+            canvas.addEventListener('touchmove', scratch);
+        }
+
+        // SPIN WHEEL
+        function spinWheel() {
+            playSoundEffect('click');
+            const wheel = document.getElementById('wheelElem');
+            const randomDeg = 1440 + Math.floor(Math.random() * 360);
+            wheel.style.transform = `rotate(${randomDeg}deg)`;
+            setTimeout(() => {
+                openModal("Wheel Reward", LOVE_MESSAGES.activities[4], "🎡");
+            }, 3200);
+        }
+
+        function triggerStarPuzzle() {
+            openModal("Cosmic Connection", "Stars linked into eternal love for Arooj! ✨", "🌟");
+        }
+
+        function plantFlower(elem) {
+            playSoundEffect('click');
+            elem.innerText = '🌸';
+            elem.classList.add('animate-bounce');
+        }
+
+        let missionTasks = 0;
+        function updateMissionProgress() {
+            missionTasks++;
+            playSoundEffect('click');
+            if (missionTasks >= 3) {
+                openModal("Mission Completed", "Ali is so proud of you! You completed all love tasks! ❤️", "🏆");
+            }
+        }
+
+        // TREASURE BOX 25 LETTERS
+        let openedLetters = new Set();
+        let isChestOpen = false;
+
+        function openTreasureChest() {
+            if (isChestOpen) return;
+            isChestOpen = true;
+            playSoundEffect('unlock');
+
+            document.getElementById('chestLockIcon').className = "fas fa-lock-open text-4xl text-softpink";
+            document.getElementById('chestStatusText').innerText = "Treasure Chest Unlocked!";
+            document.getElementById('chestProgress').classList.remove('hidden');
+
+            const grid = document.getElementById('lettersGrid');
+            grid.classList.remove('hidden');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= 25; i++) {
+                const btn = document.createElement('button');
+                btn.className = "p-3 rounded-xl glass-card border border-rosegold/30 hover:border-rosegold text-xs font-cinzel font-bold text-softpink transition-all flex flex-col items-center gap-1";
+                btn.innerHTML = `<span>✉️</span><span>#${i}</span>`;
+                btn.onclick = () => openSingleTreasureLetter(i, btn);
+                grid.appendChild(btn);
+            }
+        }
+
+        function openSingleTreasureLetter(num, btn) {
+            openedLetters.add(num);
+            btn.classList.add('opacity-40');
+            document.getElementById('openedLettersCount').innerText = openedLetters.size;
+
+            openModal(`Love Letter #${num}`, LOVE_MESSAGES.treasure[num - 1], "💌");
+
+            if (openedLetters.size === 25) {
+                setTimeout(() => {
+                    openModal("Final Treasury Declaration", "Arooj, you have opened all 25 love letters! Ali will love you for eternity and beyond! 💖✨", "👑");
+                }, 1000);
+            }
+        }
+
+        // INITIALIZE ON WINDOW LOAD
+        window.onload = function() {
+            init3DHeart();
+        };
+
+        window.onresize = function() {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        };
+    </script>
+</body>
+</html>
